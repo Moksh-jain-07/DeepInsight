@@ -1,0 +1,17 @@
+# Node.js
+node_modules/
+npm-debug.log*
+
+# Temporary generated files
+temp_uploads/
+report.json
+output_py.pcap
+test_gen.pcap
+
+# Build artifacts
+*.exe
+build/
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeepInsight - DPI Packet Analyzer Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app-shell">
+
+    <!-- ═══════════════════════════════════════ LEFT SIDEBAR ═══ -->
+    <aside class="sidebar">
+        <div class="logo">
+            <div class="logo-mark">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+            </div>
+            <span class="logo-text">DeepInsight</span>
+        </div>
+
+        <p class="nav-section-label">OVERVIEW</p>
+        <nav class="nav-links">
+            <a class="nav-item active" data-tab="dashboard">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                Dashboard
+            </a>
+            <a class="nav-item" data-tab="rules">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                Blocking Rules
+            </a>
+            <a class="nav-item" data-tab="simulator">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                Simulator
+            </a>
+            <a class="nav-item" data-tab="docs">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                Documentation
+            </a>
+        </nav>
+
+        <p class="nav-section-label">ACTIVE RULES</p>
+        <div class="active-rules-preview" id="sidebar-rules-preview">
+            <!-- dynamically filled -->
+        </div>
+
+        <div class="sidebar-bottom">
+            <p class="nav-section-label">SETTINGS</p>
+            <a class="nav-item" id="cleanup-btn">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                Clear Storage
+            </a>
+            <a class="nav-item nav-danger" id="re-analyze-btn" style="display:none;">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                Re-Analyze
+            </a>
+        </div>
+    </aside>
+
+    <!-- ════════════════════════════════════════ MAIN AREA ═══ -->
+    <main class="main-area">
+
+        <!-- Top Bar -->
+        <header class="top-bar">
+            <div class="search-box">
+                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" id="flow-search" placeholder="Search flows, IP addresses, domains...">
+            </div>
+            <div class="top-bar-right">
+                <button class="icon-btn" title="Notifications">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                    <span class="notif-dot"></span>
+                </button>
+                <button class="icon-btn" title="Settings">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                </button>
+                <div class="user-pill">
+                    <div class="user-avatar">DI</div>
+                    <span>DeepInsight</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- ─── Tab Panes ─── -->
+        <div class="tab-content">
+
+            <!-- ══════ DASHBOARD TAB ══════ -->
+            <section id="tab-dashboard" class="tab-pane active">
+
+                <!-- Hero Banner -->
+                <div class="hero-banner">
+                    <div class="hero-text">
+                        <p class="hero-eyebrow">DEEP PACKET INSPECTION</p>
+                        <h2>Analyze, Classify &<br>Filter Network Traffic</h2>
+                        <p class="hero-sub">Upload a PCAP capture file or synthesize mock traffic to inspect individual flows and apply real-time blocking rules.</p>
+                        <button class="hero-btn" id="hero-upload-btn">
+                            Upload PCAP
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 8 16 12 12 16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                        </button>
+                        <input type="file" id="pcap-file-input" accept=".pcap" style="display:none;">
+                    </div>
+                    <div class="hero-visual">
+                        <div class="hero-packet-stack">
+                            <div class="hp hp1">ETH</div>
+                            <div class="hp hp2">IPv4</div>
+                            <div class="hp hp3">TCP</div>
+                            <div class="hp hp4">TLS</div>
+                            <div class="hp hp5">SNI</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress Cards row -->
+                <div class="progress-cards-row">
+                    <div class="prog-card" id="prog-packets">
+                        <div class="prog-icon packets">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/></svg>
+                        </div>
+                        <div class="prog-info">
+                            <span class="prog-count" id="stat-total-packets">–</span>
+                            <span class="prog-label">Total Packets</span>
+                        </div>
+                        <button class="prog-menu">⋯</button>
+                    </div>
+                    <div class="prog-card" id="prog-flows">
+                        <div class="prog-icon flows">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                        </div>
+                        <div class="prog-info">
+                            <span class="prog-count" id="stat-active-flows">–</span>
+                            <span class="prog-label">Active Flows</span>
+                        </div>
+                        <button class="prog-menu">⋯</button>
+                    </div>
+                    <div class="prog-card" id="prog-forwarded">
+                        <div class="prog-icon forwarded">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                        </div>
+                        <div class="prog-info">
+                            <span class="prog-count" id="stat-forwarded">–</span>
+                            <span class="prog-label">Forwarded</span>
+                        </div>
+                        <button class="prog-menu">⋯</button>
+                    </div>
+                    <div class="prog-card" id="prog-dropped">
+                        <div class="prog-icon dropped">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                        </div>
+                        <div class="prog-info">
+                            <span class="prog-count" id="stat-dropped">–</span>
+                            <span class="prog-label">Blocked</span>
+                        </div>
+                        <button class="prog-menu">⋯</button>
+                    </div>
+                </div>
+
+                <!-- Upload progress -->
+                <div id="upload-progress-bar" class="upload-progress-wrap" style="display:none;">
+                    <div class="upload-progress-inner">
+                        <span id="upload-status-label">Uploading...</span>
+                        <div class="progress-track"><div class="progress-fill" id="prog-fill"></div></div>
+                        <span id="progress-pct">0%</span>
+                    </div>
+                </div>
+
+                <!-- Results area -->
+                <div id="dashboard-results" style="display:none;">
+                    <div class="section-header">
+                        <h3>Detected Application Flows</h3>
+                        <button class="btn-text" id="download-filtered-btn">
+                            Download Filtered PCAP
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        </button>
+                    </div>
+
+                    <!-- App Flow Cards Grid -->
+                    <div class="flow-cards-grid" id="flow-cards-grid">
+                        <!-- dynamically filled -->
+                    </div>
+
+                    <!-- Flow Table -->
+                    <div class="section-header mt-24">
+                        <h3>Connection Flow Explorer</h3>
+                        <span class="badge-count" id="flow-count-badge">0 flows</span>
+                    </div>
+                    <div class="table-card">
+                        <table class="flows-table">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Source</th>
+                                    <th>Destination</th>
+                                    <th>Protocol</th>
+                                    <th>Application</th>
+                                    <th>Domain / SNI</th>
+                                    <th>Pkts</th>
+                                    <th>Volume</th>
+                                    <th>Status</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="flows-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Empty state when no file loaded -->
+                <div id="empty-state">
+                    <div class="empty-card">
+                        <div class="empty-icon">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                        </div>
+                        <h4>Drop a PCAP File to Begin</h4>
+                        <p>Or use the <strong>Traffic Simulator</strong> to generate synthetic captures instantly, no capture file needed.</p>
+                        <div class="empty-actions">
+                            <button class="btn-primary" id="empty-upload-btn">Upload PCAP File</button>
+                            <button class="btn-outline" id="empty-sim-btn">Open Simulator</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ══════ RULES TAB ══════ -->
+            <section id="tab-rules" class="tab-pane">
+                <div class="page-title-row">
+                    <h2>Blocking Rules Policy</h2>
+                    <p>Rules are applied automatically when analyzing any PCAP file.</p>
+                </div>
+
+                <div class="rules-layout">
+                    <div class="rules-add-card card">
+                        <h4>Add New Rule</h4>
+                        <div class="form-row">
+                            <label>Rule Type</label>
+                            <select id="rule-type">
+                                <option value="ip">Source IP Address</option>
+                                <option value="app">Application Class</option>
+                                <option value="domain">Domain Substring</option>
+                            </select>
+                        </div>
+                        <div class="form-row" id="rule-value-group">
+                            <label id="rule-value-label">IP Address</label>
+                            <input type="text" id="rule-value" placeholder="192.168.1.50">
+                        </div>
+                        <div class="form-row" id="rule-app-group" style="display:none;">
+                            <label>Application</label>
+                            <select id="rule-app-select">
+                                <option value="YOUTUBE">YouTube</option><option value="NETFLIX">Netflix</option>
+                                <option value="FACEBOOK">Facebook</option><option value="INSTAGRAM">Instagram</option>
+                                <option value="TWITTER">Twitter/X</option><option value="TIKTOK">TikTok</option>
+                                <option value="GOOGLE">Google</option><option value="AMAZON">Amazon</option>
+                                <option value="MICROSOFT">Microsoft</option><option value="APPLE">Apple</option>
+                                <option value="WHATSAPP">WhatsApp</option><option value="TELEGRAM">Telegram</option>
+                                <option value="SPOTIFY">Spotify</option><option value="ZOOM">Zoom</option>
+                                <option value="DISCORD">Discord</option><option value="GITHUB">GitHub</option>
+                                <option value="CLOUDFLARE">Cloudflare</option>
+                                <option value="DNS">DNS</option><option value="HTTP">HTTP</option>
+                            </select>
+                        </div>
+                        <button class="btn-primary btn-block" id="add-rule-btn">Apply Rule</button>
+                    </div>
+
+                    <div class="rules-lists-area">
+                        <div class="card rule-list-card">
+                            <div class="rule-list-head">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                Blocked IPs
+                                <span class="count-pill" id="ips-count">0</span>
+                            </div>
+                            <ul id="ips-rules-list" class="rule-ul"></ul>
+                        </div>
+                        <div class="card rule-list-card">
+                            <div class="rule-list-head">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                Blocked Apps
+                                <span class="count-pill" id="apps-count">0</span>
+                            </div>
+                            <ul id="apps-rules-list" class="rule-ul"></ul>
+                        </div>
+                        <div class="card rule-list-card">
+                            <div class="rule-list-head">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                                Blocked Domains
+                                <span class="count-pill" id="domains-count">0</span>
+                            </div>
+                            <ul id="domains-rules-list" class="rule-ul"></ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ══════ SIMULATOR TAB ══════ -->
+            <section id="tab-simulator" class="tab-pane">
+                <div class="page-title-row">
+                    <h2>Traffic Capture Simulator</h2>
+                    <p>Synthesize custom PCAP traces without needing a real capture device.</p>
+                </div>
+
+                <div class="sim-layout">
+                    <div class="card sim-left">
+                        <h4>Quick Presets</h4>
+                        <div class="preset-grid">
+                            <button class="preset-btn sim-preset-btn" data-preset="standard">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                                Standard Mix
+                            </button>
+                            <button class="preset-btn sim-preset-btn" data-preset="streaming">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+                                Streaming Heavy
+                            </button>
+                            <button class="preset-btn sim-preset-btn" data-preset="work">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                                Work Productivity
+                            </button>
+                            <button class="preset-btn sim-preset-btn" data-preset="attack">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                                Blocked IP Scan
+                            </button>
+                        </div>
+
+                        <div class="divider"></div>
+                        <h4>Baseline Traffic</h4>
+
+                        <div class="slider-group">
+                            <div class="slider-row">
+                                <div class="slider-label-row">
+                                    <label>DNS Queries</label>
+                                    <strong id="sim-dns-val">10</strong>
+                                </div>
+                                <input type="range" id="sim-dns" min="0" max="50" value="10">
+                            </div>
+                            <div class="slider-row">
+                                <div class="slider-label-row">
+                                    <label>Plain HTTP Flows</label>
+                                    <strong id="sim-http-val">5</strong>
+                                </div>
+                                <input type="range" id="sim-http" min="0" max="50" value="5">
+                            </div>
+                            <div class="slider-row">
+                                <div class="slider-label-row">
+                                    <label>Blocked IP Packets</label>
+                                    <strong id="sim-blocked-ip-val">15</strong>
+                                </div>
+                                <input type="range" id="sim-blocked-ip" min="0" max="100" value="15">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card sim-right">
+                        <h4>TLS Application Mix</h4>
+                        <div class="app-mix-grid">
+                            <div class="mix-row"><label>YouTube</label><input type="number" class="app-sim-input" data-app="youtube" value="5" min="0" max="50"></div>
+                            <div class="mix-row"><label>Netflix</label><input type="number" class="app-sim-input" data-app="netflix" value="3" min="0" max="50"></div>
+                            <div class="mix-row"><label>Google</label><input type="number" class="app-sim-input" data-app="google" value="10" min="0" max="50"></div>
+                            <div class="mix-row"><label>Facebook</label><input type="number" class="app-sim-input" data-app="facebook" value="4" min="0" max="50"></div>
+                            <div class="mix-row"><label>Instagram</label><input type="number" class="app-sim-input" data-app="instagram" value="3" min="0" max="50"></div>
+                            <div class="mix-row"><label>Twitter/X</label><input type="number" class="app-sim-input" data-app="twitter" value="2" min="0" max="50"></div>
+                            <div class="mix-row"><label>GitHub</label><input type="number" class="app-sim-input" data-app="github" value="5" min="0" max="50"></div>
+                            <div class="mix-row"><label>Spotify</label><input type="number" class="app-sim-input" data-app="spotify" value="3" min="0" max="50"></div>
+                            <div class="mix-row"><label>Zoom</label><input type="number" class="app-sim-input" data-app="zoom" value="2" min="0" max="50"></div>
+                            <div class="mix-row"><label>Discord</label><input type="number" class="app-sim-input" data-app="discord" value="4" min="0" max="50"></div>
+                        </div>
+                        <button class="btn-primary btn-block" id="sim-run-btn" style="margin-top:20px;">
+                            Synthesize &amp; Inspect
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 8 16 12 12 16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ══════ DOCS TAB ══════ -->
+            <section id="tab-docs" class="tab-pane">
+                <div class="page-title-row">
+                    <h2>Developer Documentation</h2>
+                    <p>Architecture overview and protocol inspection details.</p>
+                </div>
+                <div class="docs-card card">
+                    <h3>How Deep Packet Inspection Works</h3>
+                    <p>DeepInsight analyzes each network packet through multiple layers to identify its application origin and apply blocking policies.</p>
+                    <div class="doc-steps">
+                        <div class="doc-step"><div class="step-num">01</div><div><h5>Ethernet Parse</h5><p>Extracts source/destination MAC addresses and validates EtherType for IPv4 (0x0800).</p></div></div>
+                        <div class="doc-step"><div class="step-num">02</div><div><h5>IPv4 Header</h5><p>Reads source/destination IP, protocol field (TCP=6, UDP=17) and IHL for payload offset.</p></div></div>
+                        <div class="doc-step"><div class="step-num">03</div><div><h5>5-Tuple Flow Tracking</h5><p>Maps packets to bidirectional conversations via (SrcIP, DstIP, SrcPort, DstPort, Protocol).</p></div></div>
+                        <div class="doc-step"><div class="step-num">04</div><div><h5>TLS SNI Extraction</h5><p>Parses TLS Client Hello on port 443 to find Server Name Indication in plaintext — even HTTPS leaks the domain name here.</p></div></div>
+                        <div class="doc-step"><div class="step-num">05</div><div><h5>HTTP Host Parsing</h5><p>For port 80, scans payload for <code>Host:</code> header and extracts the target hostname.</p></div></div>
+                        <div class="doc-step"><div class="step-num">06</div><div><h5>Policy Engine</h5><p>Matches each flow against the rule set. Blocked flows are dropped from the output PCAP entirely.</p></div></div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- ══════════════════════════════════════ RIGHT PANEL ══════ -->
+    <aside class="right-panel">
+        <!-- User Card -->
+        <div class="user-card">
+            <div class="user-ring-wrap">
+                <svg class="ring-svg" viewBox="0 0 80 80">
+                    <circle class="ring-bg" cx="40" cy="40" r="34" fill="none" stroke="#E8E8F0" stroke-width="6"/>
+                    <circle class="ring-fg" id="block-ring" cx="40" cy="40" r="34" fill="none" stroke="#6C63FF" stroke-width="6"
+                        stroke-dasharray="213.6" stroke-dashoffset="213.6" stroke-linecap="round" transform="rotate(-90 40 40)"/>
+                </svg>
+                <div class="user-avatar-lg">DI</div>
+                <div class="ring-pct" id="block-pct">0%</div>
+            </div>
+            <h4>Network Monitor</h4>
+            <p id="user-card-status">Upload a capture to begin inspection.</p>
+        </div>
+
+        <!-- App Stats Bar Chart -->
+        <div class="right-section">
+            <div class="section-header-sm">
+                <span>App Distribution</span>
+                <button class="btn-text-sm">⋯</button>
+            </div>
+            <div class="chart-area">
+                <canvas id="appChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Top Domains / Detected SNIs -->
+        <div class="right-section">
+            <div class="section-header-sm">
+                <span>Detected Domains</span>
+                <button class="btn-text-sm" id="see-all-domains">See All</button>
+            </div>
+            <div id="domains-list" class="domains-list">
+                <p class="muted-hint">No domains detected yet.</p>
+            </div>
+        </div>
+    </aside>
+
+</div>
+
+<!-- ════════════ FLOW INSPECTOR DRAWER ════════════ -->
+<div id="inspector-drawer" class="drawer">
+    <div class="drawer-inner">
+        <div class="drawer-head">
+            <h4>Flow Inspection</h4>
+            <button id="close-drawer" class="close-btn">&times;</button>
+        </div>
+        <div class="meta-grid">
+            <div class="meta-item"><label>Key</label><span id="inspect-key">-</span></div>
+            <div class="meta-item"><label>Application</label><span id="inspect-app" class="chip chip-app">-</span></div>
+            <div class="meta-item"><label>Domain</label><span id="inspect-host">-</span></div>
+            <div class="meta-item"><label>Volume</label><span id="inspect-bytes">-</span></div>
+            <div class="meta-item"><label>Status</label><span id="inspect-status" class="chip">-</span></div>
+        </div>
+        <h5 style="margin:20px 0 10px;">Packet Sequence</h5>
+        <div class="pkt-list-wrap">
+            <table class="pkt-table">
+                <thead><tr><th>#</th><th>Time</th><th>Dir</th><th>Size</th><th>Payload</th></tr></thead>
+                <tbody id="inspect-packets-body"></tbody>
+            </table>
+        </div>
+        <h5 style="margin:20px 0 10px;">Payload Hex Dump</h5>
+        <div class="hex-box"><pre><code id="inspect-hex-content">Select a packet above to view bytes.</code></pre></div>
+    </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast"><span id="toast-message"></span></div>
+
+<script src="app.js"></script>
+</body>
+</html>

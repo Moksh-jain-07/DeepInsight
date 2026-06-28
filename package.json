@@ -1,0 +1,16 @@
+{
+  "name": "deepinsight-dashboard",
+  "version": "1.0.0",
+  "description": "DeepInsight DPI Packet Analyzer Web Dashboard",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "multer": "^1.4.5-lts.1"
+  },
+  "author": "Moksh Jain <mokshnjain7@gmail.com>",
+  "license": "MIT"
+}
